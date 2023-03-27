@@ -1,19 +1,26 @@
 <?php
+
+use PDO;
+use PDOException;
+use RuntimeException;
+use BadMethodCallException;
+use InvalidArgumentException;
+
 class Database{
  
     /**
      * database connection object
-     * @var \PDO
+     * @var PDO
      */
     protected $pdo;
  
     /**
      * Connect to the database
      */
-    public function __construct(\PDO $pdo)
+    public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
-        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
  
     /**
@@ -63,24 +70,24 @@ class Database{
     public function __call($function, array $params = array())
     {
         if (! preg_match('/^(get|update|insert|delete)(.*)$/', $function, $matches)) {
-            throw new \BadMethodCallException($function.' is an invalid method Call');
+            throw new BadMethodCallException($function.' is an invalid method Call');
         }
  
         if ('insert' == $matches[1]) {
             if (! is_array($params[0]) || count($params[0]) < 1) {
-                throw new \InvalidArgumentException('insert values must be an array');
+                throw new InvalidArgumentException('insert values must be an array');
             }
             return $this->insert($this->camelCaseToUnderscore($matches[2]), $params[0]);
         }
  
         list($tableName, $fieldName) = explode('By', $matches[2], 2);
         if (! isset($tableName, $fieldName)) {
-            throw new \BadMethodCallException($function.' is an invalid method Call');
+            throw new BadMethodCallException($function.' is an invalid method Call');
         }
          
         if ('update' == $matches[1]) {
             if (! is_array($params[1]) || count($params[1]) < 1) {
-                throw new \InvalidArgumentException('update fields must be an array');
+                throw new InvalidArgumentException('update fields must be an array');
             }
             return $this->update(
                 $this->camelCaseToUnderscore($tableName),
@@ -135,8 +142,8 @@ class Database{
                return $res;
             }
             return $res;
-        } catch (\PDOException $e) {
-            throw new \RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
+        } catch (PDOException $e) {
+            throw new RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
         }
     }
      
@@ -178,8 +185,8 @@ class Database{
                return $res;
             }
             return $res;
-        } catch (\PDOException $e) {
-            throw new \RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
+        } catch (PDOException $e) {
+            throw new RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
         }
     }
      
@@ -212,8 +219,8 @@ class Database{
             $stmt->execute();
  
             return $stmt->rowCount();
-        } catch (\PDOException $e) {
-            throw new \RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
+        } catch (PDOException $e) {
+            throw new RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
         }
     }
  
@@ -231,8 +238,8 @@ class Database{
             $stmt->execute(array(current($where)));
  
             return $stmt->rowCount();
-        } catch (\PDOException $e) {
-            throw new \RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
+        } catch (PDOException $e) {
+            throw new RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
         }
     }
      
@@ -259,8 +266,8 @@ class Database{
         try{
             $stmt->execute(array_values($data));
             return $stmt->rowCount();
-        } catch (\PDOException $e) {
-            throw new \RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
+        } catch (PDOException $e) {
+            throw new RuntimeException("[".$e->getCode()."] : ". $e->getMessage());
         }
     }
     /**
@@ -299,4 +306,3 @@ class Database{
      
      
 }
-?>
